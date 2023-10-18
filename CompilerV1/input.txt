@@ -1,0 +1,42 @@
+program CompilerV1;
+var 
+    foo: int; 
+    bar, foobar, barfoo: float;
+
+void emptyFunction() [{}];
+
+void main(floatNumber: float, intNumber: int) [
+    var 
+        number1: int;
+        number2: float;
+
+    {
+        assign1 = 1 + 2;
+        assign2 = (+1 + -2) != 3/2;
+        assign3 = 1 + 2 / (1 + 2) < assign1;
+        assign4 = (69 + 420 / -assign1) > 3;
+
+        if (condition1) { };
+
+        if (foo != bar) { 
+            foo = 1;
+        } else { 
+            bar = 2;
+        };
+
+        emptyFunction();
+        notEmptyFunction(argument1, 1+2);
+
+        while { } do (emptyWhile < 10);
+        while { 
+            i = bar + 1; 
+            j = foo - 1;
+        
+        } do (foo < 10);
+
+        print(1+2);
+        print(1+2, 2+3, "The quick brown fox jumps over the lazy dog !@#$%^&*()_+][\']");
+    }
+];
+
+end
