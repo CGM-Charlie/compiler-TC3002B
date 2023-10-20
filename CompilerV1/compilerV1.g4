@@ -1,9 +1,8 @@
 grammar compilerV1;
-
 // java -jar antlr-4.9.2-complete.jar -Dlanguage=Python3 compilerV1.g4
 
 // Program
-program : 'program' ID ';' vars_ funcs 'end';
+program : 'program' ID ';' vars_ funcs 'main' body 'end';
 
 // Vars
 vars_ :  'var' vars_helper | ;
@@ -14,7 +13,7 @@ id_var : ID (',' id_var)?;
 type_ : 'int' | 'float' ;
 
 // Funcs
-funcs : func funcs*;
+funcs : func (funcs)?;
 func : 'void' ID '(' param ')' '[' vars_ body ']' ';' ;
 param : ID ':' type_ (',' param)? | ;
 
@@ -47,7 +46,7 @@ cycle : 'while' body 'do' '(' expression ')' ';';
 f_call : ID '(' f_call_exp ')' ';';
 f_call_exp : expression (',' f_call_exp)? | ;
 
-// // Print
+// Print
 print_ : 'print' '(' print_exp ')' ';' ;
 print_exp : print_exp_arg (',' print_exp)?;
 print_exp_arg : expression | STRING;
