@@ -1,5 +1,9 @@
-grammar compilerV1;
+// Carlos Gabriel Mora Madrigal - A01379575
+
+// To generate the parser and lexer for python, run next line in terminal
 // java -jar antlr-4.9.2-complete.jar -Dlanguage=Python3 compilerV1.g4
+
+grammar compilerV1;
 
 // Program
 program : 'program' ID ';' vars_ funcs 'main' body 'end';
