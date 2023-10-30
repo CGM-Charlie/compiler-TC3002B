@@ -9,6 +9,7 @@ from compilerV1Parser import compilerV1Parser
 # pip install antlr4-python3-runtime==4.9.2
 
 # To test the parser with the input file, run the following command in terminal
+# Python 3.10 required
 # python compilerV1Driver.py input.txt
 
 # Expected result:
@@ -16,11 +17,15 @@ from compilerV1Parser import compilerV1Parser
 # if parse errors found: Log of each error detected by the parser
 
 def main(argv):
-    input_stream = FileStream(argv[1])
-    lexer = compilerV1Lexer(input_stream)
-    stream = CommonTokenStream(lexer)
-    parser = compilerV1Parser(stream)
-    tree = parser.program()
+    try:
+        input_stream = FileStream(argv[1])
+        lexer = compilerV1Lexer(input_stream)
+        stream = CommonTokenStream(lexer)
+        parser = compilerV1Parser(stream)
+        tree = parser.program()
+    except Exception as e:
+        print(f"Error: {e}")
+        exit(1)
 
 if __name__ == '__main__':
     main(sys.argv)

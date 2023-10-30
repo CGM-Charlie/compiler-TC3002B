@@ -5,21 +5,25 @@
 
 grammar compilerV1;
 
+@parser::header { 
+from variableTable import *
+}
+
 // Program
-program : 'program' ID ';' vars_ funcs 'main' body 'end';
+program : {addFunction("global", {}, 0)} 'program' ID ';' vars_ funcs 'main' body {printFuncTable()}'end';
 
 // Vars
-vars_ :  'var' vars_helper | ;
-vars_helper : id_var ':' type_ ';' vars_helper* ;
-id_var : ID (',' id_var)?;
+vars_ : 'var' vars_helper | ;
+vars_helper : id_var ':' type_ ';' {addVar($type_.text, $type_.start.line)} vars_helper* ;
+id_var : ID {addID($ID.text)} (',' id_var)?;
 
 // Type
 type_ : 'int' | 'float' ;
 
 // Funcs
 funcs : func (funcs)?;
-func : 'void' ID '(' param ')' '[' vars_ body ']' ';' ;
-param : ID ':' type_ (',' param)? | ;
+func : 'void' ID {addFunction($ID.text, {}, $ID.line)} '(' param ')' '[' vars_ body ']' ';' ;
+param : ID {addID($ID.text)} ':' type_ {addVar($type_.text, $type_.start.line)} (',' param)? | ;
 
 // Body
 body : '{' statement* '}';

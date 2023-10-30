@@ -4,6 +4,9 @@ if __name__ is not None and "." in __name__:
     from .compilerV1Parser import compilerV1Parser
 else:
     from compilerV1Parser import compilerV1Parser
+ 
+from variableTable import *
+
 
 # This class defines a complete listener for a parse tree produced by compilerV1Parser.
 class compilerV1Listener(ParseTreeListener):

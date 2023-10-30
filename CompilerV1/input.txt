@@ -1,9 +1,9 @@
-                    program CompilerV1;
+program CompilerV1;
 var 
     foo: int; 
     bar, foobar, barfoo: float;
 
-void emptyFunction() [{}];
+void emptyFunction2() [{}];
 void emptyFunction2(floatNumber: float, intNumber: int) [
     var 
         number1: int;
