@@ -332,6 +332,15 @@ def quadEvaluateWhile():
     # TODO: CHECK IF THE QUAD IS GOTOF OR GOTOT
     quadTable.append(Quadruple(operation="GOTOF", arg1=quadTable[-1].target, arg2=None, target = end))
 
+def quadPrintExpression():
+    global quadTable, operand
+    result = operand.pop()
+    quadTable.append(Quadruple(operation="PRINT", arg1=result, arg2=None, target=None))
+
+def quadPrintString(text: str):
+    global quadTable
+    quadTable.append(Quadruple(operation="PRINT", arg1=QuadArg(value=text, kind='str'), arg2=None, target=None))
+
 def printExpression():
     global quadTable, operand, operator
 

@@ -58,7 +58,7 @@ f_call_exp : expression (',' f_call_exp)? | ;
 // Print
 print_ : 'print' '(' print_exp ')' ';' ;
 print_exp : print_exp_arg (',' print_exp)?;
-print_exp_arg : expression | STRING;
+print_exp_arg : expression {quadPrintExpression()} | STRING {quadPrintString($STRING.text)};
 
 // Constants
 cte : INT | FLOAT ;

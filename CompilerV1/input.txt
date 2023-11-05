@@ -9,11 +9,7 @@ void emptyFunction2(floatNumber: float, intNumber: int) [
         number1: int;
         number2: float;
     {
-        number2 = 1.0 + 2.0;
-
-        while {
-            number1 = 1 + 2;
-        } do (number1 > 2);
+        print(1+2, number1, "texto pero en string");
     }
 ];
 
