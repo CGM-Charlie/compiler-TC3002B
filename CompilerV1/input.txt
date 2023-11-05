@@ -3,19 +3,28 @@ var
     foo: int; 
     bar, foobar, barfoo: float;
 
-void emptyFunction1() [{}];
+void emptyFunction1() [
+    var
+        temp: int;
+    
+    {
+        temp = 1 + 2;
+        temp = 10;
+    }
+];
 void emptyFunction2(floatNumber: float, intNumber: int) [
     var 
         number1: int;
         number2: float;
     {
-        print(1+2, number1, "texto pero en string");
+        number1 = 3 + 3;
+        number2 = 4 + 4.0;
     }
 ];
 
 main 
 { 
-
+    emptyFunction2(2, 3);
 }
 
 end

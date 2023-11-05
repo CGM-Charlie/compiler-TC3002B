@@ -11,7 +11,7 @@ from variableTable import *
 }
 
 // Program
-program : {addFunction("global", {}, 0)} 'program' ID ';' vars_ funcs 'main' body {printFuncTable()} 'end' {printExpression()} ;
+program : {addFunction("global", {}, 0)} {initMainFuncQuad()} 'program' ID ';' vars_ funcs 'main' {setFuncQuadStart(True)} body {printFuncTable()} 'end' {printExpression()} ;
 
 // Vars
 vars_ : 'var' vars_helper | ;
@@ -23,7 +23,7 @@ type_ : 'int' | 'float' ;
 
 // Funcs
 funcs : func (funcs)?;
-func : 'void' ID {addFunction($ID.text, {}, $ID.line)} '(' param ')' '[' vars_ body ']' ';' ;
+func : 'void' ID {addFunction($ID.text, {}, $ID.line)} '(' param ')' '[' vars_ {setFuncQuadStart(False)} body {setFuncQuadEnd()} ']' ';' ;
 param : ID {addID($ID.text)} ':' type_ {addVar($type_.text, $type_.start.line)} (',' param)? | ;
 
 // Body
@@ -52,7 +52,7 @@ else_statement : {quadCheckElse()} 'else' body | ;
 cycle : 'while' {quadCheckWhile()} body 'do' '(' expression ')' {quadEvaluateWhile()} ';';
 
 // F_Call
-f_call : ID '(' f_call_exp ')' ';';
+f_call : ID '(' f_call_exp ')' {quadInitFunctionCall($ID.text)} ';';
 f_call_exp : expression (',' f_call_exp)? | ;
 
 // Print

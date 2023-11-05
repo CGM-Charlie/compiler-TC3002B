@@ -7,7 +7,7 @@ from dataclasses import dataclass
 class Var:
     name: str
     kind: str
-    value: any = 0
+    value: any = 0 # TODO, Check if default value causes problems when reassign
 
 @dataclass
 class Quadruple:
@@ -25,6 +25,8 @@ class QuadArg:
 class Func:
     id: str
     vars: dict
+    quadStart: int
+    quadEnd: int
 
     def get_var(self, key: str) -> any:
         return self.vars.get(key, None)
@@ -136,11 +138,17 @@ currentFunction = -1
 # Temporary Variables
 idQueue = []
 
+# Quadruples - Assign
+quadJumps = []
+operator = []
+operand = []
+resultsIndex = 0
+
 # Prints raw data for the function table and variable table
 def printFuncTable():
     global funcsTable
     # for func in funcsTable:
-    #     print("FUNC -> ", func.id, func.vars)
+    #     print("FUNC -> ", func.id, func.quadEnd)
 
 # Check if function exists in the Functions Table
 def function_exists(name) -> bool:
@@ -158,7 +166,26 @@ def addFunction(name, vars, execLine):
     if function_exists(name):
         raise Exception(f"Multiple Redeclaration of {name} at {execLine}")
 
-    funcsTable.append(Func(name, vars))
+    funcsTable.append(Func(id=name, vars=vars, quadStart=0, quadEnd=0))
+
+def setFuncQuadStart(isMainFunction: bool):
+    global funcsTable, currentFunction, quadTable
+
+    if isMainFunction:
+        currentFunction = 0
+        quadTable[0].target = len(quadTable)
+        funcsTable[0].quadStart = len(quadTable)
+    else:
+        funcsTable[currentFunction].quadStart = len(quadTable)
+
+def setFuncQuadEnd():
+    global funcsTable, currentFunction, quadTable
+    quadTable.append(Quadruple(operation="GOTO", arg1=None, arg2=None, target=None))
+    funcsTable[currentFunction].quadEnd = len(quadTable)
+
+def initMainFuncQuad():
+    global quadTable
+    quadTable.append(Quadruple(operation="GOTO", arg1=None, arg2=None, target=None))
 
 # Stores the ID while finding the data type it belongs
 def addID(id):
@@ -178,13 +205,6 @@ def addVar(kind, execLine):
             raise Exception(f"Multiple Redeclaration of {name} at line {execLine}")
 
         funcsTable[currentFunction].set_var(name, Var(name=name, kind=kind))
-    
-
-# Quadruples - Assign
-quadJumps = []
-operator = []
-operand = []
-resultsIndex = 0
 
 # TODO: Find the name and data type in the vars table and use that if it is an ID, else, check the data type with a cast
 # in the meantime just store it
@@ -341,6 +361,43 @@ def quadPrintString(text: str):
     global quadTable
     quadTable.append(Quadruple(operation="PRINT", arg1=QuadArg(value=text, kind='str'), arg2=None, target=None))
 
+def GetFunctionCall(id: str):
+    global funcsTable, quadTable
+
+    for func in funcsTable:
+        if func.id == id:
+            return func
+
+    return None  
+
+def quadInitFunctionCall(id: str):
+    global funcsTable, quadTable, operand
+
+    tempFunc = GetFunctionCall(id=id)
+
+    if tempFunc == None:
+        raise Exception(f"Unknown '{id}' function call")
+    
+    # TODO: To properly check the arguments of the functions, try to implement a funcArgs variable list independent of the main one, or add an extra parameter
+    # to indicate the number of parameters
+
+    # if len(operand) != len(tempFunc.vars):
+    #     raise Exception(f"Valieron los argumentos raza")
+
+    counter = len(operand)
+
+    for i in tempFunc.vars:
+        if counter <= 0:
+            break
+        
+        tempOperand = operand.pop(0)
+        target = QuadArg(value=tempFunc.vars[i].name, kind=tempFunc.vars[i].kind)
+        quadTable.append(Quadruple(operation="=", arg1=tempOperand, arg2=QuadArg(value=tempFunc.id, kind="function"), target=target))
+        counter -= 1
+
+    quadTable.append(Quadruple(operation="GOTO", arg1=None, arg2=None, target=tempFunc.quadStart))
+    quadTable[tempFunc.quadEnd-1].target = len(quadTable)
+
 def printExpression():
     global quadTable, operand, operator
 
@@ -352,3 +409,6 @@ def printExpression():
         print(quad)
 
     print("\n")
+
+# Notes for execution
+# If any goto function target goes out of bounds, it means that main function is empty or that the code already ended the execution
