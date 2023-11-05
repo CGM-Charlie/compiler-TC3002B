@@ -2,6 +2,7 @@
 
 // To generate the parser and lexer for python, run next line in terminal
 // java -jar antlr-4.9.2-complete.jar -Dlanguage=Python3 compilerV1.g4
+// python compilerV1Driver.py input.txt
 
 grammar compilerV1;
 
@@ -32,13 +33,13 @@ body : '{' statement* '}';
 statement : assign | condition | cycle | f_call | print_;
 
 // Assign
-assign : ID '=' expression ';';
+assign : ID {quadAddOperand($ID.text)} '=' {quadAddOperator("=")} expression {quadCheckAssign()} {printExpression()} ';';
 
 // Expression
-expression : exp (('<' | '>' | '!=') exp)? ;
-exp : term (('+' | '-') exp)? ;
-term : factor (('*' | '/') term)? ;
-factor : '(' expression ')' | factor_sign ID | factor_sign cte;
+expression : exp {quadCheckBoolean()} (('<' {quadAddOperator("<")} | '>' {quadAddOperator(">")} | '!=' {quadAddOperator("!=")}) expression)? ;
+exp : term {quadCheckSumOrSub()} (('+' {quadAddOperator("+")} | '-' {quadAddOperator("-")}) exp)? ;
+term : factor {quadCheckMultOrDiv()} (('*' {quadAddOperator("*")} | '/' {quadAddOperator("/")}) term)? ;
+factor : '(' {quadAddOperator("(")} expression ')' {quadPopOperator()} | factor_sign ID {quadAddOperand("{}{}".format($factor_sign.text, $ID.text))} | factor_sign cte {quadAddOperand("{}{}".format($factor_sign.text, $cte.text))};
 
 // Factor Sign
 factor_sign : '+' | '-' | ;
