@@ -8,9 +8,8 @@ void emptyFunction2(floatNumber: float, intNumber: int) [
     var 
         number1: int;
         number2: float;
-    
     {
-        number1 = 2 + (2 - -3);
+        number1 = 2.69 * (2 * -3);
         number2 = 12 != -number1;
     }    
 ];

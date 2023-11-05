@@ -4,23 +4,10 @@ from dataclasses import dataclass
 
 # Data Classes
 @dataclass
-class Func:
-    id: str
-    vars: dict
-
-    def get_var(self, key: str) -> any:
-        return self.vars.get(key, None)
-    
-    def set_var(self, key: str, value: any) -> None:
-        self.vars[key] = value
-
-    def element_exists(self, key: str) -> bool:
-        return key in self.vars
-
-@dataclass
 class Var:
     name: str
     kind: str
+    value: any = 0
 
 @dataclass
 class Quadruple:
@@ -29,46 +16,114 @@ class Quadruple:
     arg2: any
     target: any
 
+@dataclass
+class QuadArg:
+    value: str
+    kind: str
+
+@dataclass
+class Func:
+    id: str
+    vars: dict
+
+    def get_var(self, key: str) -> any:
+        return self.vars.get(key, None)
+    
+    def get_var_as_quadArg(self, key: str) -> QuadArg:
+        tempVar = self.vars.get(key, None)
+        return QuadArg(value=tempVar.name, kind=tempVar.kind)
+
+    def set_var(self, key: str, value: any) -> None:
+        self.vars[key] = value
+
+    def element_exists(self, key: str) -> bool:
+        return key in self.vars
+
 # Semantic Cube
 semanticCube = {
     '+': {
         'int': {
             'int': 'int',
-            'float': 'float'
+            'float': 'float',
+            'bool': 'null'
         },
         'float': { 
             'int': 'float',
-            'float': 'float'
+            'float': 'float',
+            'bool': 'null'
+        },
+        'bool': {
+            'int': 'null',
+            'float': 'null',
+            'bool': 'null'
         }
     },
     '-': {
         'int': {
             'int': 'int',
-            'float': 'float'
+            'float': 'float',
+            'bool': 'null'
         },
         'float': { 
             'int': 'float',
-            'float': 'float'
+            'float': 'float',
+            'bool': 'null'
+        },
+        'bool': {
+            'int': 'null',
+            'float': 'null',
+            'bool': 'null'
         }
     },
     '*': {
         'int': {
             'int': 'int',
-            'float': 'float'
+            'float': 'float',
+            'bool': 'null'
         },
         'float': { 
             'int': 'float',
-            'float': 'float'
+            'float': 'float',
+            'bool': 'null'
+        },
+        'bool': {
+            'int': 'null',
+            'float': 'null',
+            'bool': 'null'
         }
     },
     '/': {
         'int': {
             'int': 'int',
-            'float': 'float'
+            'float': 'float',
+            'bool': 'null'
         },
         'float': { 
             'int': 'float',
-            'float': 'float'
+            'float': 'float',
+            'bool': 'null'
+        },
+        'bool': {
+            'int': 'null',
+            'float': 'null',
+            'bool': 'null'
+        }
+    },
+    '=': {
+        'int': {
+            'int': 'int',
+            'float': 'null',
+            'bool': 'null'
+        },
+        'float': {
+            'int': 'float',
+            'float': 'float',
+            'bool': 'null'
+        },
+        'bool': {
+            'int': 'null',
+            'float': 'null',
+            'bool': 'bool'
         }
     }
 }
@@ -136,6 +191,8 @@ resultsIndex = 0
 def quadAddOperand(name, execLine, isVar: bool = False):
     global operand
 
+    tempVar: QuadArg
+
     if isVar:
         indexPlus = name.find('+')
         indexMinus = name.find('-')
@@ -143,11 +200,20 @@ def quadAddOperand(name, execLine, isVar: bool = False):
         if indexPlus != -1 or indexMinus != -1:
             if not funcsTable[currentFunction].element_exists(name[1:]):
                 raise Exception(f"Unknown variable {name[1:]} at {execLine}")
+            
+            tempVar = funcsTable[currentFunction].get_var_as_quadArg(name[1:])
         else:
             if not funcsTable[currentFunction].element_exists(name):
                 raise Exception(f"Unknown variable {name} at {execLine}")
+            
+            tempVar = funcsTable[currentFunction].get_var_as_quadArg(name)
+    else:
+        if name.find('.') != -1:
+            tempVar = QuadArg(value=name, kind="float")
+        else:
+            tempVar = QuadArg(value=name, kind="int")
 
-    operand.append(name)
+    operand.append(tempVar)
 
 def quadAddOperator(name):
     global operator
@@ -164,9 +230,14 @@ def quadCheckMultOrDiv():
         left_operand = operand.pop()
         right_operand = operand.pop()
         op = operator.pop()
-        test = "t{}".format(resultsIndex)
-        quadTable.append(Quadruple(op, right_operand, left_operand, test))
-        operand.append(test)
+        
+        resultKind = semanticCube[op][left_operand.kind][right_operand.kind]
+        if resultKind == 'null':
+            Exception(f"Type Mismatch between {right_operand.value} at {left_operand.value}")
+
+        result = QuadArg(value="t{}".format(resultsIndex), kind="int")
+        quadTable.append(Quadruple(op, right_operand, left_operand, result))
+        operand.append(result)
         resultsIndex += 1
 
 def quadCheckSumOrSub():
@@ -176,9 +247,14 @@ def quadCheckSumOrSub():
         left_operand = operand.pop()
         right_operand = operand.pop()
         op = operator.pop()
-        test = "t{}".format(resultsIndex)
-        quadTable.append(Quadruple(op, right_operand, left_operand, test))
-        operand.append(test)
+
+        resultKind = semanticCube[op][left_operand.kind][right_operand.kind]
+        if resultKind == 'null':
+            Exception(f"Type Mismatch between {right_operand.value} at {left_operand.value}")
+
+        result = QuadArg(value="t{}".format(resultsIndex), kind=resultKind)
+        quadTable.append(Quadruple(op, right_operand, left_operand, result))
+        operand.append(result)
         resultsIndex += 1
 
 def quadCheckBoolean():
@@ -188,9 +264,9 @@ def quadCheckBoolean():
         left_operand = operand.pop()
         right_operand = operand.pop()
         op = operator.pop()
-        test = "t{}".format(resultsIndex)
-        quadTable.append(Quadruple(op, right_operand, left_operand, test))
-        operand.append(test)
+        result = QuadArg(value="t{}".format(resultsIndex), kind="bool")
+        quadTable.append(Quadruple(op, right_operand, left_operand, result))
+        operand.append(result)
         resultsIndex += 1
 
 def quadCheckAssign():
@@ -200,6 +276,11 @@ def quadCheckAssign():
         left_operand = operand.pop()
         right_operand = operand.pop()
         op = operator.pop()
+
+        resultKind = semanticCube[op][left_operand.kind][right_operand.kind]
+        if resultKind == 'null':
+            Exception(f"Type Mismatch between {right_operand.value} at {left_operand.value}")
+
         quadTable.append(Quadruple(op, left_operand, "", right_operand))
 
 def printExpression():
@@ -212,7 +293,4 @@ def printExpression():
     for quad in quadTable:
         print(quad)
 
-    operand = []
-    operator = []
-    
     print("\n")
