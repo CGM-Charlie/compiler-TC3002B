@@ -49,7 +49,7 @@ condition : 'if' '(' expression ')' {quadCheckIf()} body else_statement ';' {qua
 else_statement : {quadCheckElse()} 'else' body | ;
 
 // Cycles
-cycle : 'while' body 'do' '(' expression ')' ';';
+cycle : 'while' {quadCheckWhile()} body 'do' '(' expression ')' {quadEvaluateWhile()} ';';
 
 // F_Call
 f_call : ID '(' f_call_exp ')' ';';
