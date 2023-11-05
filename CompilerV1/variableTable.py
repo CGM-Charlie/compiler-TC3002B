@@ -133,8 +133,20 @@ resultsIndex = 0
 
 # TODO: Find the name and data type in the vars table and use that if it is an ID, else, check the data type with a cast
 # in the meantime just store it
-def quadAddOperand(name):
+def quadAddOperand(name, execLine, isVar: bool = False):
     global operand
+
+    if isVar:
+        indexPlus = name.find('+')
+        indexMinus = name.find('-')
+
+        if indexPlus != -1 or indexMinus != -1:
+            if not funcsTable[currentFunction].element_exists(name[1:]):
+                raise Exception(f"Unknown variable {name[1:]} at {execLine}")
+        else:
+            if not funcsTable[currentFunction].element_exists(name):
+                raise Exception(f"Unknown variable {name} at {execLine}")
+
     operand.append(name)
 
 def quadAddOperator(name):

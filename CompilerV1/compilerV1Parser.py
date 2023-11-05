@@ -914,7 +914,7 @@ class compilerV1Parser ( Parser ):
             self.enterOuterAlt(localctx, 1)
             self.state = 129
             localctx._ID = self.match(compilerV1Parser.ID)
-            quadAddOperand((None if localctx._ID is None else localctx._ID.text))
+            quadAddOperand((None if localctx._ID is None else localctx._ID.text), (0 if localctx._ID is None else localctx._ID.line), True)
             self.state = 131
             self.match(compilerV1Parser.T__16)
             quadAddOperator("=")
@@ -1219,7 +1219,7 @@ class compilerV1Parser ( Parser ):
                 localctx._factor_sign = self.factor_sign()
                 self.state = 180
                 localctx._ID = self.match(compilerV1Parser.ID)
-                quadAddOperand("{}{}".format((None if localctx._factor_sign is None else self._input.getText(localctx._factor_sign.start,localctx._factor_sign.stop)), (None if localctx._ID is None else localctx._ID.text)))
+                quadAddOperand("{}{}".format((None if localctx._factor_sign is None else self._input.getText(localctx._factor_sign.start,localctx._factor_sign.stop)), (None if localctx._ID is None else localctx._ID.text)), (0 if localctx._ID is None else localctx._ID.line), True)
                 pass
 
             elif la_ == 3:
@@ -1228,7 +1228,7 @@ class compilerV1Parser ( Parser ):
                 localctx._factor_sign = self.factor_sign()
                 self.state = 184
                 localctx._cte = self.cte()
-                quadAddOperand("{}{}".format((None if localctx._factor_sign is None else self._input.getText(localctx._factor_sign.start,localctx._factor_sign.stop)), (None if localctx._cte is None else self._input.getText(localctx._cte.start,localctx._cte.stop))))
+                quadAddOperand("{}{}".format((None if localctx._factor_sign is None else self._input.getText(localctx._factor_sign.start,localctx._factor_sign.stop)), (None if localctx._cte is None else self._input.getText(localctx._cte.start,localctx._cte.stop))), (None if localctx._factor_sign is None else localctx._factor_sign.start).line)
                 pass
 
 

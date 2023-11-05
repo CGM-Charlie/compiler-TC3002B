@@ -10,8 +10,8 @@ void emptyFunction2(floatNumber: float, intNumber: int) [
         number2: float;
     
     {
-        assign1 = 2 + (2 - -3);
-        assign2 = 12 != -assign1;
+        number1 = 2 + (2 - -3);
+        number2 = 12 != -number1;
     }    
 ];
 

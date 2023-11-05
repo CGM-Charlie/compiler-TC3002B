@@ -33,13 +33,13 @@ body : '{' statement* '}';
 statement : assign | condition | cycle | f_call | print_;
 
 // Assign
-assign : ID {quadAddOperand($ID.text)} '=' {quadAddOperator("=")} expression {quadCheckAssign()} {printExpression()} ';';
+assign : ID {quadAddOperand($ID.text, $ID.line, True)} '=' {quadAddOperator("=")} expression {quadCheckAssign()} {printExpression()} ';';
 
 // Expression
 expression : exp {quadCheckBoolean()} (('<' {quadAddOperator("<")} | '>' {quadAddOperator(">")} | '!=' {quadAddOperator("!=")}) expression)? ;
 exp : term {quadCheckSumOrSub()} (('+' {quadAddOperator("+")} | '-' {quadAddOperator("-")}) exp)? ;
 term : factor {quadCheckMultOrDiv()} (('*' {quadAddOperator("*")} | '/' {quadAddOperator("/")}) term)? ;
-factor : '(' {quadAddOperator("(")} expression ')' {quadPopOperator()} | factor_sign ID {quadAddOperand("{}{}".format($factor_sign.text, $ID.text))} | factor_sign cte {quadAddOperand("{}{}".format($factor_sign.text, $cte.text))};
+factor : '(' {quadAddOperator("(")} expression ')' {quadPopOperator()} | factor_sign ID {quadAddOperand("{}{}".format($factor_sign.text, $ID.text), $ID.line, True)} | factor_sign cte {quadAddOperand("{}{}".format($factor_sign.text, $cte.text), $factor_sign.start.line)};
 
 // Factor Sign
 factor_sign : '+' | '-' | ;
