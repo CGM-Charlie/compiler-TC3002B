@@ -11,7 +11,7 @@ from variableTable import *
 }
 
 // Program
-program : {addFunction("global", {}, 0)} 'program' ID ';' vars_ funcs 'main' body {printFuncTable()}'end';
+program : {addFunction("global", {}, 0)} 'program' ID ';' vars_ funcs 'main' body {printFuncTable()} 'end' {printExpression()} ;
 
 // Vars
 vars_ : 'var' vars_helper | ;
@@ -33,7 +33,7 @@ body : '{' statement* '}';
 statement : assign | condition | cycle | f_call | print_;
 
 // Assign
-assign : ID {quadAddOperand($ID.text, $ID.line, True)} '=' {quadAddOperator("=")} expression {quadCheckAssign()} {printExpression()} ';';
+assign : ID {quadAddOperand($ID.text, $ID.line, True)} '=' {quadAddOperator("=")} expression {quadCheckAssign()} ';';
 
 // Expression
 expression : exp {quadCheckBoolean()} (('<' {quadAddOperator("<")} | '>' {quadAddOperator(">")} | '!=' {quadAddOperator("!=")}) expression)? ;
@@ -45,8 +45,8 @@ factor : '(' {quadAddOperator("(")} expression ')' {quadPopOperator()} | factor_
 factor_sign : '+' | '-' | ;
 
 // Condition
-condition : 'if' '(' expression ')' body else_statement ';' ;
-else_statement : 'else' body | ;
+condition : 'if' '(' expression ')' {quadCheckIf()} body else_statement ';' {quadEndIf()} ;
+else_statement : {quadCheckElse()} 'else' body | ;
 
 // Cycles
 cycle : 'while' body 'do' '(' expression ')' ';';

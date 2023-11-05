@@ -9,9 +9,12 @@ void emptyFunction2(floatNumber: float, intNumber: int) [
         number1: int;
         number2: float;
     {
-        number1 = 2.69 * (2 * -3);
-        number2 = 12 != -number1;
-    }    
+        if (1 > 2) { 
+           number1 = 1 - 2; 
+        } else {
+            number1 = 1 + 2;
+        };
+    }
 ];
 
 main 

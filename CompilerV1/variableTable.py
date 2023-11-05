@@ -181,10 +181,11 @@ def addVar(kind, execLine):
     
 
 # Quadruples - Assign
-
+quadJumps = []
 operator = []
 operand = []
 resultsIndex = 0
+elseFlag = False
 
 # TODO: Find the name and data type in the vars table and use that if it is an ID, else, check the data type with a cast
 # in the meantime just store it
@@ -226,6 +227,9 @@ def quadPopOperator():
 def quadCheckMultOrDiv():
     global quadTable, operator, operand, resultsIndex
 
+    if not operator:
+        return
+
     if operator[-1] == '*' or operator[-1] == '/':
         left_operand = operand.pop()
         right_operand = operand.pop()
@@ -233,7 +237,7 @@ def quadCheckMultOrDiv():
         
         resultKind = semanticCube[op][left_operand.kind][right_operand.kind]
         if resultKind == 'null':
-            Exception(f"Type Mismatch between {right_operand.value} at {left_operand.value}")
+            raise Exception(f"Type Mismatch between {right_operand.value} at {left_operand.value}")
 
         result = QuadArg(value="t{}".format(resultsIndex), kind="int")
         quadTable.append(Quadruple(op, right_operand, left_operand, result))
@@ -243,6 +247,9 @@ def quadCheckMultOrDiv():
 def quadCheckSumOrSub():
     global quadTable, operator, operand, resultsIndex
 
+    if not operator:
+        return
+
     if operator[-1] == '+' or operator[-1] == '-':
         left_operand = operand.pop()
         right_operand = operand.pop()
@@ -250,7 +257,7 @@ def quadCheckSumOrSub():
 
         resultKind = semanticCube[op][left_operand.kind][right_operand.kind]
         if resultKind == 'null':
-            Exception(f"Type Mismatch between {right_operand.value} at {left_operand.value}")
+            raise Exception(f"Type Mismatch between {right_operand.value} at {left_operand.value}")
 
         result = QuadArg(value="t{}".format(resultsIndex), kind=resultKind)
         quadTable.append(Quadruple(op, right_operand, left_operand, result))
@@ -259,6 +266,9 @@ def quadCheckSumOrSub():
 
 def quadCheckBoolean():
     global quadTable, operator, operand, resultsIndex
+
+    if not operator:
+        return
 
     if operator[-1] == '<' or operator[-1] == '>' or operator[-1] == '!=':
         left_operand = operand.pop()
@@ -272,6 +282,9 @@ def quadCheckBoolean():
 def quadCheckAssign():
     global quadTable, operator, operand, resultsIndex
 
+    if not operator:
+        return
+
     if operator[-1] == '=':
         left_operand = operand.pop()
         right_operand = operand.pop()
@@ -279,15 +292,37 @@ def quadCheckAssign():
 
         resultKind = semanticCube[op][left_operand.kind][right_operand.kind]
         if resultKind == 'null':
-            Exception(f"Type Mismatch between {right_operand.value} at {left_operand.value}")
+            raise Exception(f"Type Mismatch between {right_operand.value} at {left_operand.value}")
 
-        quadTable.append(Quadruple(op, left_operand, "", right_operand))
+        quadTable.append(Quadruple(op, left_operand, None, right_operand))
+
+def quadCheckIf():
+    global quadTable, operator, operand, quadJumps
+
+    if quadTable[-1].target.kind != 'bool':
+        raise Exception(f"Type Mismatch at if condition")
+    
+    operand.pop()
+    quadTable.append(Quadruple(operation="GOTOF", arg1=quadTable[-1].target, arg2=None, target = None))
+    quadJumps.append(len(quadTable)-1)
+
+def quadCheckElse():
+    global quadTable, operator, operand, quadJumps
+    quadTable.append(Quadruple(operation="GOTO", arg1=quadTable[-1].target, arg2=None, target = None))
+    false = quadJumps.pop()
+    quadJumps.append(len(quadTable)-1)
+    quadTable[false].target = len(quadTable)
+
+def quadEndIf():
+    global quadTable, operator, operand, quadJumps
+    end = quadJumps.pop()
+    quadTable[end].target = len(quadTable)
 
 def printExpression():
     global quadTable, operand, operator
 
-    print("Operands", operand)
-    print("Operators", operator)
+    # print("Operands", operand)
+    # print("Operators", operator)
 
     print("Quads") 
     for quad in quadTable:
