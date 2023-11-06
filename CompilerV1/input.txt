@@ -6,10 +6,13 @@ var
 void emptyFunction1() [
     var
         temp: int;
-    
     {
-        temp = 1 + 2;
-        temp = 10;
+        temp = 1 / 2 * (2 + 3);
+        if (temp > 10) { 
+            print("Print mayor que 10");
+        } else {
+            print("Print no jala");
+        };
     }
 ];
 void emptyFunction2(floatNumber: float, intNumber: int) [
@@ -17,8 +20,12 @@ void emptyFunction2(floatNumber: float, intNumber: int) [
         number1: int;
         number2: float;
     {
-        number1 = 3 + 3;
-        number2 = 4 + 4.0;
+        number1 = 0;
+        number2 = 3.0;
+
+        while {
+            number1 = number1 + 1;
+        } do (number1 > number2);
     }
 ];
 
