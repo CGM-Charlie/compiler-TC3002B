@@ -1,17 +1,18 @@
 program CompilerV1;
 var 
-    foo: int; 
+    foo, temp, number1: int; 
     bar, foobar, barfoo: float;
 
 void emptyFunction1() [
     var
-        temp: int;
+        number1: int;
     {
-        temp = 1 / 2 * (2 + 3);
-        if (temp > 10) { 
-            print("Print mayor que 10");
-        } else {
-            print("Print no jala");
+        number1 =  1 + 2 * 3 / (4 + 5);
+
+        if (1 > 2) { 
+            number1 = 1;
+        } else { 
+            number1 = 2;
         };
     }
 ];
@@ -20,18 +21,35 @@ void emptyFunction2(floatNumber: float, intNumber: int) [
         number1: int;
         number2: float;
     {
-        number1 = 0;
-        number2 = 3.0;
+        number1 = 1 + 2;
 
-        while {
-            number1 = number1 + 1;
-        } do (number1 > number2);
+        while { 
+            number1 = 1;
+        } do (1 < 2);
     }
 ];
 
 main 
 { 
-    emptyFunction2(2, 3);
+    foo = 1;
+
+    print(foo);
+
+    if (foo > 3 + 5) { 
+        print("Foo al parecer si es mas grande");
+    } else {
+        print("foo no es mas grande que 8");
+    };
+
+    while { 
+        if (foo != 3) { 
+            print("diferente de 3");
+        } else {
+            print("es tres!");
+        };
+
+        foo = foo + 1;
+    } do (foo < 5);
 }
 
 end

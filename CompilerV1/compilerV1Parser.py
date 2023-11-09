@@ -290,7 +290,7 @@ class compilerV1Parser ( Parser ):
             printFuncTable()
             self.state = 61
             self.match(compilerV1Parser.T__3)
-            printExpression()
+            runQuads()
         except RecognitionException as re:
             localctx.exception = re
             self._errHandler.reportError(self, re)

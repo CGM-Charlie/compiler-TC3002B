@@ -25,6 +25,7 @@ class QuadArg:
 class Func:
     id: str
     vars: dict
+    tempVars: []
     quadStart: int
     quadEnd: int
 
@@ -160,13 +161,13 @@ def function_exists(name) -> bool:
 
 # Add a new function to the functions table
 def addFunction(name, vars, execLine):
-    global funcsTable, currentFunction
+    global funcsTable, currentFunction, resultsIndex
     currentFunction += 1
     
     if function_exists(name):
         raise Exception(f"Multiple Redeclaration of {name} at {execLine}")
 
-    funcsTable.append(Func(id=name, vars=vars, quadStart=0, quadEnd=0))
+    funcsTable.append(Func(id=name, vars=vars, tempVars=[], quadStart=0, quadEnd=0))
 
 def setFuncQuadStart(isMainFunction: bool):
     global funcsTable, currentFunction, quadTable
@@ -179,9 +180,10 @@ def setFuncQuadStart(isMainFunction: bool):
         funcsTable[currentFunction].quadStart = len(quadTable)
 
 def setFuncQuadEnd():
-    global funcsTable, currentFunction, quadTable
+    global funcsTable, currentFunction, quadTable, resultsIndex
     quadTable.append(Quadruple(operation="GOTO", arg1=None, arg2=None, target=None))
     funcsTable[currentFunction].quadEnd = len(quadTable)
+    resultsIndex = 0
 
 def initMainFuncQuad():
     global quadTable
@@ -213,6 +215,7 @@ def quadAddOperand(name, execLine, isVar: bool = False):
 
     tempVar: QuadArg
 
+    # Check the sign also with constants lmao 
     if isVar:
         indexPlus = name.find('+')
         indexMinus = name.find('-')
@@ -258,7 +261,7 @@ def quadCheckMultOrDiv():
         if resultKind == 'null':
             raise Exception(f"Type Mismatch between {right_operand.value} at {left_operand.value}")
 
-        result = QuadArg(value="t{}".format(resultsIndex), kind="int")
+        result = QuadArg(value="_t{}".format(resultsIndex), kind=resultKind) # Check this
         quadTable.append(Quadruple(op, right_operand, left_operand, result))
         operand.append(result)
         resultsIndex += 1
@@ -278,7 +281,7 @@ def quadCheckSumOrSub():
         if resultKind == 'null':
             raise Exception(f"Type Mismatch between {right_operand.value} at {left_operand.value}")
 
-        result = QuadArg(value="t{}".format(resultsIndex), kind=resultKind)
+        result = QuadArg(value="_t{}".format(resultsIndex), kind=resultKind)
         quadTable.append(Quadruple(op, right_operand, left_operand, result))
         operand.append(result)
         resultsIndex += 1
@@ -293,7 +296,7 @@ def quadCheckBoolean():
         left_operand = operand.pop()
         right_operand = operand.pop()
         op = operator.pop()
-        result = QuadArg(value="t{}".format(resultsIndex), kind="bool")
+        result = QuadArg(value="_t{}".format(resultsIndex), kind="bool")
         quadTable.append(Quadruple(op, right_operand, left_operand, result))
         operand.append(result)
         resultsIndex += 1
@@ -350,7 +353,7 @@ def quadEvaluateWhile():
     operand.pop()
     end = quadJumps.pop()
     # TODO: CHECK IF THE QUAD IS GOTOF OR GOTOT
-    quadTable.append(Quadruple(operation="GOTOF", arg1=quadTable[-1].target, arg2=None, target = end))
+    quadTable.append(Quadruple(operation="GOTOT", arg1=quadTable[-1].target, arg2=None, target = end))
 
 def quadPrintExpression():
     global quadTable, operand
@@ -398,17 +401,178 @@ def quadInitFunctionCall(id: str):
     quadTable.append(Quadruple(operation="GOTO", arg1=None, arg2=None, target=tempFunc.quadStart))
     quadTable[tempFunc.quadEnd-1].target = len(quadTable)
 
-def printExpression():
-    global quadTable, operand, operator
-
-    # print("Operands", operand)
-    # print("Operators", operator)
-
-    print("Quads") 
-    for quad in quadTable:
-        print(quad)
-
-    print("\n")
-
 # Notes for execution
 # If any goto function target goes out of bounds, it means that main function is empty or that the code already ended the execution
+
+# Virtual Machine Segment - CarLang
+
+# Function id refers to the current function that is currently being executed
+current_function_id = 0
+instruction_pointer = 0
+
+def runQuads():
+    global quadTable, instruction_pointer, funcsTable
+
+    print("Quads")
+    for i in range(0, len(quadTable)):
+        print(i, quadTable[i])
+    print()
+
+    while instruction_pointer < len(quadTable):
+        executeQuad(quadTable[instruction_pointer])
+        instruction_pointer += 1
+        # input()
+
+def executeQuad(quad: Quadruple):
+    global instruction_pointer, current_function_id, funcsTable, quadTable
+
+    if quad.operation == "=":
+        value = formatExpressionArgument(quad.arg1)
+        funcsTable[current_function_id].get_var(quad.target.value).value = value
+
+    elif quad.operation == "+":
+        # Get values for the arguments
+        left_operand = formatExpressionArgument(quad.arg1)
+        right_operand = formatExpressionArgument(quad.arg2)        
+        index = int(quad.target.value[2:])
+
+        if index < len(funcsTable[current_function_id].tempVars):
+            if quad.target.kind == "int":
+                funcsTable[current_function_id].tempVars[index] = int(left_operand + right_operand)
+            else:
+                funcsTable[current_function_id].tempVars[index] = float(left_operand + right_operand)
+        else:
+            if quad.target.kind == "int":
+                funcsTable[current_function_id].tempVars.append(int(left_operand + right_operand))
+            else:
+                funcsTable[current_function_id].tempVars.append(float(left_operand + right_operand))
+
+
+    elif quad.operation == "-":
+        # Get values for the arguments
+        left_operand = formatExpressionArgument(quad.arg1)
+        right_operand = formatExpressionArgument(quad.arg2)
+        index = int(quad.target.value[2:])
+
+        if index < len(funcsTable[current_function_id].tempVars):
+            if quad.target.kind == "int":
+                funcsTable[current_function_id].tempVars[index] = int(left_operand - right_operand)
+            else:
+                funcsTable[current_function_id].tempVars[index] = float(left_operand - right_operand)
+        else:
+            if quad.target.kind == "int":
+                funcsTable[current_function_id].tempVars.append(int(left_operand - right_operand))
+            else:
+                funcsTable[current_function_id].tempVars.append(float(left_operand - right_operand))
+
+    elif quad.operation == "*":
+        # Get values for the arguments
+        left_operand = formatExpressionArgument(quad.arg1)
+        right_operand = formatExpressionArgument(quad.arg2)
+        index = int(quad.target.value[2:])
+
+        if index < len(funcsTable[current_function_id].tempVars):
+            if quad.target.kind == "int":
+                funcsTable[current_function_id].tempVars[index] = int(left_operand * right_operand)
+            else:
+                funcsTable[current_function_id].tempVars[index] = float(left_operand * right_operand)
+        else:
+            if quad.target.kind == "int":
+                funcsTable[current_function_id].tempVars.append(int(left_operand * right_operand))
+            else:
+                funcsTable[current_function_id].tempVars.append(float(left_operand * right_operand))
+
+    elif quad.operation == "/":
+        # Get values for the arguments
+        left_operand = formatExpressionArgument(quad.arg1)
+        right_operand = formatExpressionArgument(quad.arg2)
+        index = int(quad.target.value[2:])
+
+        if index < len(funcsTable[current_function_id].tempVars):
+            if quad.target.kind == "int":
+                funcsTable[current_function_id].tempVars[index] = int(left_operand / right_operand)
+            else:
+                funcsTable[current_function_id].tempVars[index] = float(left_operand / right_operand)
+        else:
+            if quad.target.kind == "int":
+                funcsTable[current_function_id].tempVars.append(int(left_operand / right_operand))
+            else:
+                funcsTable[current_function_id].tempVars.append(float(left_operand / right_operand))
+
+    elif quad.operation == "<":
+        # Get values for the arguments
+        left_operand = formatExpressionArgument(quad.arg1)
+        right_operand = formatExpressionArgument(quad.arg2)
+        index = int(quad.target.value[2:])
+
+        if index < len(funcsTable[current_function_id].tempVars):
+            funcsTable[current_function_id].tempVars[index] = left_operand < right_operand
+        else:
+            funcsTable[current_function_id].tempVars.append(left_operand < right_operand)
+
+    elif quad.operation == ">":
+        # Get values for the arguments
+        left_operand = formatExpressionArgument(quad.arg1)
+        right_operand = formatExpressionArgument(quad.arg2)
+        index = int(quad.target.value[2:])
+
+        if index < len(funcsTable[current_function_id].tempVars):
+            funcsTable[current_function_id].tempVars[index] = left_operand > right_operand
+        else:
+            funcsTable[current_function_id].tempVars.append(left_operand > right_operand)
+
+    elif quad.operation == "!=":
+        # Get values for the arguments
+        left_operand = formatExpressionArgument(quad.arg1)
+        right_operand = formatExpressionArgument(quad.arg2)
+        index = int(quad.target.value[2:])
+
+        if index < len(funcsTable[current_function_id].tempVars):
+            funcsTable[current_function_id].tempVars[index] = left_operand != right_operand
+        else:
+            funcsTable[current_function_id].tempVars.append(left_operand != right_operand)
+
+    elif quad.operation == "PRINT":
+        if quad.arg1.kind == 'str':
+            print(quad.arg1.value.replace('"', ''))
+        else:
+            print(formatExpressionArgument(quad.arg1))
+
+    elif quad.operation == "GOTO":
+        # To properly assign the instruction_pointer, it is required to sub -1 the target to compensate the
+        # update of the instruction_pointer at the next iteration
+        instruction_pointer = quad.target - 1
+
+    elif quad.operation == "GOTOF":
+        # To properly assign the instruction_pointer, it is required to sub -1 the target to compensate the
+        # update of the instruction_pointer at the next iteration
+        if not formatExpressionArgument(quad.arg1):
+            instruction_pointer = quad.target - 1
+
+    elif quad.operation == "GOTOT":
+        # To properly assign the instruction_pointer, it is required to sub -1 the target to compensate the
+        # update of the instruction_pointer at the next iteration
+        if formatExpressionArgument(quad.arg1):
+            instruction_pointer = quad.target - 1
+
+def formatExpressionArgument(quadArg: QuadArg) -> any:
+    global current_function_id, funcsTable
+    
+    value = None
+
+    # Check if QuadArg is a variable
+    if quadArg.value[0] == "_":
+        value = funcsTable[current_function_id].tempVars[int(quadArg.value[2:])]
+
+    # Check if QuadArg is a number
+    elif quadArg.value[0].isdigit() or quadArg.value[0] == "+" and quadArg.value[1].isdigit() or quadArg.value[0] == "-" and quadArg.value[1].isdigit():
+        if quadArg.kind == 'int':
+            value = int(quadArg.value)
+        else:
+            value = float(quadArg.value)
+    
+    # Default to a constant
+    else:
+        value = funcsTable[current_function_id].get_var(quadArg.value).value
+    
+    return value
