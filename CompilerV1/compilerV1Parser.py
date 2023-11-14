@@ -270,8 +270,8 @@ class compilerV1Parser ( Parser ):
         self.enterRule(localctx, 0, self.RULE_program)
         try:
             self.enterOuterAlt(localctx, 1)
-            addFunction("global", {}, 0)
-            initMainFuncQuad()
+            add_function("global", {}, 0)
+            init_main_func_quad()
             self.state = 52
             self.match(compilerV1Parser.T__0)
             self.state = 53
@@ -284,13 +284,13 @@ class compilerV1Parser ( Parser ):
             self.funcs()
             self.state = 57
             self.match(compilerV1Parser.T__2)
-            setFuncQuadStart(True)
+            set_func_quad_start(True)
             self.state = 59
             self.body()
-            printFuncTable()
+            print_funcs_table()
             self.state = 61
             self.match(compilerV1Parser.T__3)
-            runQuads()
+            run_quads()
         except RecognitionException as re:
             localctx.exception = re
             self._errHandler.reportError(self, re)
@@ -407,7 +407,7 @@ class compilerV1Parser ( Parser ):
             localctx._type_ = self.type_()
             self.state = 72
             self.match(compilerV1Parser.T__1)
-            addVar((None if localctx._type_ is None else self._input.getText(localctx._type_.start,localctx._type_.stop)), (None if localctx._type_ is None else localctx._type_.start).line)
+            add_var((None if localctx._type_ is None else self._input.getText(localctx._type_.start,localctx._type_.stop)), (None if localctx._type_ is None else localctx._type_.start).line)
             self.state = 77
             self._errHandler.sync(self)
             _alt = self._interp.adaptivePredict(self._input,1,self._ctx)
@@ -466,7 +466,7 @@ class compilerV1Parser ( Parser ):
             self.enterOuterAlt(localctx, 1)
             self.state = 80
             localctx._ID = self.match(compilerV1Parser.ID)
-            addID((None if localctx._ID is None else localctx._ID.text))
+            add_id((None if localctx._ID is None else localctx._ID.text))
             self.state = 84
             self._errHandler.sync(self)
             _la = self._input.LA(1)
@@ -633,7 +633,7 @@ class compilerV1Parser ( Parser ):
             self.match(compilerV1Parser.T__9)
             self.state = 93
             localctx._ID = self.match(compilerV1Parser.ID)
-            addFunction((None if localctx._ID is None else localctx._ID.text), {}, (0 if localctx._ID is None else localctx._ID.line))
+            add_function((None if localctx._ID is None else localctx._ID.text), {}, (0 if localctx._ID is None else localctx._ID.line))
             self.state = 95
             self.match(compilerV1Parser.T__10)
             self.state = 96
@@ -644,10 +644,10 @@ class compilerV1Parser ( Parser ):
             self.match(compilerV1Parser.T__12)
             self.state = 99
             self.vars_()
-            setFuncQuadStart(False)
+            set_func_quad_start(False)
             self.state = 101
             self.body()
-            setFuncQuadEnd()
+            set_func_quad_end()
             self.state = 103
             self.match(compilerV1Parser.T__13)
             self.state = 104
@@ -708,12 +708,12 @@ class compilerV1Parser ( Parser ):
                 self.enterOuterAlt(localctx, 1)
                 self.state = 106
                 localctx._ID = self.match(compilerV1Parser.ID)
-                addID((None if localctx._ID is None else localctx._ID.text))
+                add_id((None if localctx._ID is None else localctx._ID.text))
                 self.state = 108
                 self.match(compilerV1Parser.T__5)
                 self.state = 109
                 localctx._type_ = self.type_()
-                addVar((None if localctx._type_ is None else self._input.getText(localctx._type_.start,localctx._type_.stop)), (None if localctx._type_ is None else localctx._type_.start).line)
+                add_var((None if localctx._type_ is None else self._input.getText(localctx._type_.start,localctx._type_.stop)), (None if localctx._type_ is None else localctx._type_.start).line)
                 self.state = 113
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
@@ -925,13 +925,13 @@ class compilerV1Parser ( Parser ):
             self.enterOuterAlt(localctx, 1)
             self.state = 134
             localctx._ID = self.match(compilerV1Parser.ID)
-            quadAddOperand((None if localctx._ID is None else localctx._ID.text), (0 if localctx._ID is None else localctx._ID.line), True)
+            quad_add_operand((None if localctx._ID is None else localctx._ID.text), (0 if localctx._ID is None else localctx._ID.line), True)
             self.state = 136
             self.match(compilerV1Parser.T__16)
-            quadAddOperator("=")
+            quad_add_operator("=")
             self.state = 138
             self.expression()
-            quadCheckAssign()
+            quad_check_assign()
             self.state = 140
             self.match(compilerV1Parser.T__1)
         except RecognitionException as re:
@@ -981,7 +981,7 @@ class compilerV1Parser ( Parser ):
             self.enterOuterAlt(localctx, 1)
             self.state = 142
             self.exp()
-            quadCheckBoolean()
+            quad_check_boolean()
             self.state = 153
             self._errHandler.sync(self)
             _la = self._input.LA(1)
@@ -992,17 +992,17 @@ class compilerV1Parser ( Parser ):
                 if token in [compilerV1Parser.T__17]:
                     self.state = 144
                     self.match(compilerV1Parser.T__17)
-                    quadAddOperator("<")
+                    quad_add_operator("<")
                     pass
                 elif token in [compilerV1Parser.T__18]:
                     self.state = 146
                     self.match(compilerV1Parser.T__18)
-                    quadAddOperator(">")
+                    quad_add_operator(">")
                     pass
                 elif token in [compilerV1Parser.T__19]:
                     self.state = 148
                     self.match(compilerV1Parser.T__19)
-                    quadAddOperator("!=")
+                    quad_add_operator("!=")
                     pass
                 else:
                     raise NoViableAltException(self)
@@ -1058,7 +1058,7 @@ class compilerV1Parser ( Parser ):
             self.enterOuterAlt(localctx, 1)
             self.state = 155
             self.term()
-            quadCheckSumOrSub()
+            quad_check_sum_or_sub()
             self.state = 164
             self._errHandler.sync(self)
             _la = self._input.LA(1)
@@ -1069,12 +1069,12 @@ class compilerV1Parser ( Parser ):
                 if token in [compilerV1Parser.T__20]:
                     self.state = 157
                     self.match(compilerV1Parser.T__20)
-                    quadAddOperator("+")
+                    quad_add_operator("+")
                     pass
                 elif token in [compilerV1Parser.T__21]:
                     self.state = 159
                     self.match(compilerV1Parser.T__21)
-                    quadAddOperator("-")
+                    quad_add_operator("-")
                     pass
                 else:
                     raise NoViableAltException(self)
@@ -1130,7 +1130,7 @@ class compilerV1Parser ( Parser ):
             self.enterOuterAlt(localctx, 1)
             self.state = 166
             self.factor()
-            quadCheckMultOrDiv()
+            quad_check_mult_or_div()
             self.state = 175
             self._errHandler.sync(self)
             _la = self._input.LA(1)
@@ -1141,12 +1141,12 @@ class compilerV1Parser ( Parser ):
                 if token in [compilerV1Parser.T__22]:
                     self.state = 168
                     self.match(compilerV1Parser.T__22)
-                    quadAddOperator("*")
+                    quad_add_operator("*")
                     pass
                 elif token in [compilerV1Parser.T__23]:
                     self.state = 170
                     self.match(compilerV1Parser.T__23)
-                    quadAddOperator("/")
+                    quad_add_operator("/")
                     pass
                 else:
                     raise NoViableAltException(self)
@@ -1215,12 +1215,12 @@ class compilerV1Parser ( Parser ):
                 self.enterOuterAlt(localctx, 1)
                 self.state = 177
                 self.match(compilerV1Parser.T__10)
-                quadAddOperator("(")
+                quad_add_operator("(")
                 self.state = 179
                 self.expression()
                 self.state = 180
                 self.match(compilerV1Parser.T__11)
-                quadPopOperator()
+                quad_pop_operator()
                 pass
 
             elif la_ == 2:
@@ -1229,7 +1229,7 @@ class compilerV1Parser ( Parser ):
                 localctx._factor_sign = self.factor_sign()
                 self.state = 184
                 localctx._ID = self.match(compilerV1Parser.ID)
-                quadAddOperand("{}{}".format((None if localctx._factor_sign is None else self._input.getText(localctx._factor_sign.start,localctx._factor_sign.stop)), (None if localctx._ID is None else localctx._ID.text)), (0 if localctx._ID is None else localctx._ID.line), True)
+                quad_add_operand("{}{}".format((None if localctx._factor_sign is None else self._input.getText(localctx._factor_sign.start,localctx._factor_sign.stop)), (None if localctx._ID is None else localctx._ID.text)), (0 if localctx._ID is None else localctx._ID.line), True)
                 pass
 
             elif la_ == 3:
@@ -1238,7 +1238,7 @@ class compilerV1Parser ( Parser ):
                 localctx._factor_sign = self.factor_sign()
                 self.state = 188
                 localctx._cte = self.cte()
-                quadAddOperand("{}{}".format((None if localctx._factor_sign is None else self._input.getText(localctx._factor_sign.start,localctx._factor_sign.stop)), (None if localctx._cte is None else self._input.getText(localctx._cte.start,localctx._cte.stop))), (None if localctx._factor_sign is None else localctx._factor_sign.start).line)
+                quad_add_operand("{}{}".format((None if localctx._factor_sign is None else self._input.getText(localctx._factor_sign.start,localctx._factor_sign.stop)), (None if localctx._cte is None else self._input.getText(localctx._cte.start,localctx._cte.stop))), (None if localctx._factor_sign is None else localctx._factor_sign.start).line)
                 pass
 
 
@@ -1354,14 +1354,14 @@ class compilerV1Parser ( Parser ):
             self.expression()
             self.state = 201
             self.match(compilerV1Parser.T__11)
-            quadCheckIf()
+            quad_check_if()
             self.state = 203
             self.body()
             self.state = 204
             self.else_statement()
             self.state = 205
             self.match(compilerV1Parser.T__1)
-            quadEndIf()
+            quad_end_if()
         except RecognitionException as re:
             localctx.exception = re
             self._errHandler.reportError(self, re)
@@ -1406,7 +1406,7 @@ class compilerV1Parser ( Parser ):
             token = self._input.LA(1)
             if token in [compilerV1Parser.T__25]:
                 self.enterOuterAlt(localctx, 1)
-                quadCheckElse()
+                quad_check_else()
                 self.state = 209
                 self.match(compilerV1Parser.T__25)
                 self.state = 210
@@ -1465,7 +1465,7 @@ class compilerV1Parser ( Parser ):
             self.enterOuterAlt(localctx, 1)
             self.state = 214
             self.match(compilerV1Parser.T__26)
-            quadCheckWhile()
+            quad_check_while()
             self.state = 216
             self.body()
             self.state = 217
@@ -1476,7 +1476,7 @@ class compilerV1Parser ( Parser ):
             self.expression()
             self.state = 220
             self.match(compilerV1Parser.T__11)
-            quadEvaluateWhile()
+            quad_evaluate_while()
             self.state = 222
             self.match(compilerV1Parser.T__1)
         except RecognitionException as re:
@@ -1531,7 +1531,7 @@ class compilerV1Parser ( Parser ):
             self.f_call_exp()
             self.state = 227
             self.match(compilerV1Parser.T__11)
-            quadInitFunctionCall((None if localctx._ID is None else localctx._ID.text))
+            quad_init_function_call((None if localctx._ID is None else localctx._ID.text))
             self.state = 229
             self.match(compilerV1Parser.T__1)
         except RecognitionException as re:
@@ -1760,13 +1760,13 @@ class compilerV1Parser ( Parser ):
                 self.enterOuterAlt(localctx, 1)
                 self.state = 250
                 self.expression()
-                quadPrintExpression()
+                quad_print_expression()
                 pass
             elif token in [compilerV1Parser.STRING]:
                 self.enterOuterAlt(localctx, 2)
                 self.state = 253
                 localctx._STRING = self.match(compilerV1Parser.STRING)
-                quadPrintString((None if localctx._STRING is None else localctx._STRING.text))
+                quad_print_string((None if localctx._STRING is None else localctx._STRING.text))
                 pass
             else:
                 raise NoViableAltException(self)
