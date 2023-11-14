@@ -7,7 +7,7 @@ from dataclasses import dataclass
 class Var:
     name: str
     kind: str
-    value: any = 0 # TODO, Check if default value causes problems when reassign
+    value: any = 0
 
 @dataclass
 class Quadruple:
@@ -225,6 +225,7 @@ def quadAddOperand(name, execLine, isVar: bool = False):
                 raise Exception(f"Unknown variable {name[1:]} at {execLine}")
             
             tempVar = funcsTable[currentFunction].get_var_as_quadArg(name[1:])
+            tempVar.value = name
         else:
             if not funcsTable[currentFunction].element_exists(name):
                 raise Exception(f"Unknown variable {name} at {execLine}")
@@ -421,6 +422,7 @@ def runQuads():
     while instruction_pointer < len(quadTable):
         executeQuad(quadTable[instruction_pointer])
         instruction_pointer += 1
+        # print(funcsTable[current_function_id].tempVars)
         # input()
 
 def executeQuad(quad: Quadruple):
@@ -573,6 +575,11 @@ def formatExpressionArgument(quadArg: QuadArg) -> any:
     
     # Default to a constant
     else:
-        value = funcsTable[current_function_id].get_var(quadArg.value).value
+        if quadArg.value[0] == "+":
+            value = funcsTable[current_function_id].get_var(quadArg.value[1:]).value
+        elif quadArg.value[0] == "-":
+            value = funcsTable[current_function_id].get_var(quadArg.value[1:]).value * -1
+        else:
+            value = funcsTable[current_function_id].get_var(quadArg.value).value
     
     return value

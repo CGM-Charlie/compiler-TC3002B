@@ -1,6 +1,6 @@
 program CompilerV1;
 var 
-    foo, temp, number1: int; 
+    foo, temp, number1, num, n1, n2, n3, cont: int; 
     bar, foobar, barfoo: float;
 
 void emptyFunction1() [
@@ -50,6 +50,28 @@ main
 
         foo = foo + 1;
     } do (foo < 5);
+
+    num = 10;
+    cont = 0;
+    n1 = 0;
+    n2 = 1;
+    if (num < 1) {
+        print("Not a valid number");
+    } else {
+        if (num < 2) {
+        print("Fibonacci seq");
+        print(n1);
+        } else {
+        print("Fibonacci seq");
+        while {
+            print(n1);
+            n3 = n1 + n2;
+            n1 = n2;
+            n2 = n3;
+            cont = cont + 1;
+        } do (cont < num);
+        };
+    };
 }
 
 end
