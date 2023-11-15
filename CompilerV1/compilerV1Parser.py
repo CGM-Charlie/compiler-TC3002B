@@ -407,7 +407,7 @@ class compilerV1Parser ( Parser ):
             localctx._type_ = self.type_()
             self.state = 72
             self.match(compilerV1Parser.T__1)
-            add_var((None if localctx._type_ is None else self._input.getText(localctx._type_.start,localctx._type_.stop)), (None if localctx._type_ is None else localctx._type_.start).line)
+            add_var((None if localctx._type_ is None else self._input.getText(localctx._type_.start,localctx._type_.stop)), (None if localctx._type_ is None else localctx._type_.start).line, False)
             self.state = 77
             self._errHandler.sync(self)
             _alt = self._interp.adaptivePredict(self._input,1,self._ctx)
@@ -713,7 +713,7 @@ class compilerV1Parser ( Parser ):
                 self.match(compilerV1Parser.T__5)
                 self.state = 109
                 localctx._type_ = self.type_()
-                add_var((None if localctx._type_ is None else self._input.getText(localctx._type_.start,localctx._type_.stop)), (None if localctx._type_ is None else localctx._type_.start).line)
+                add_var((None if localctx._type_ is None else self._input.getText(localctx._type_.start,localctx._type_.stop)), (None if localctx._type_ is None else localctx._type_.start).line, True)
                 self.state = 113
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)

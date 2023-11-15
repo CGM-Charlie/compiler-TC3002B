@@ -7,13 +7,8 @@ void emptyFunction1() [
     var
         number1: int;
     {
-        number1 =  1 + 2 * 3 / (4 + 5);
-
-        if (1 > 2) { 
-            number1 = 1;
-        } else { 
-            number1 = 2;
-        };
+        number1 = 420;
+        print(number1);
     }
 ];
 void emptyFunction2(floatNumber: float, intNumber: int) [
@@ -21,57 +16,20 @@ void emptyFunction2(floatNumber: float, intNumber: int) [
         number1: int;
         number2: float;
     {
-        number1 = 1 + 2;
-
-        while { 
-            number1 = 1;
-        } do (1 < 2);
+        print(floatNumber);
+        print(number2);
     }
 ];
 
 main 
 { 
-    foo = 1;
+    emptyFunction1();
 
+    foo = 5/2;
     print(foo);
 
-    if (foo > 3 + 5) { 
-        print("Foo al parecer si es mas grande");
-    } else {
-        print("foo no es mas grande que 8");
-    };
-
-    while { 
-        if (foo != 3) { 
-            print("diferente de 3");
-        } else {
-            print("es tres!");
-        };
-
-        foo = foo + 1;
-    } do (foo < 5);
-
-    num = 10;
-    cont = 0;
-    n1 = 0;
-    n2 = 1;
-    if (num < 1) {
-        print("Not a valid number");
-    } else {
-        if (num < 2) {
-        print("Fibonacci seq");
-        print(n1);
-        } else {
-        print("Fibonacci seq");
-        while {
-            print(n1);
-            n3 = n1 + n2;
-            n1 = n2;
-            n2 = n3;
-            cont = cont + 1;
-        } do (cont < num);
-        };
-    };
+    bar = 5.0/2;
+    print(bar);
 }
 
 end

@@ -2,7 +2,8 @@
 
 from dataclasses import dataclass
 
-# Data Classes
+# Data classes
+
 @dataclass
 class Var:
     name: str
@@ -25,10 +26,12 @@ class QuadArg:
 class Func:
     id: str
     vars: dict
+    arguments: []
     temp_vars: []
     quad_start: int
     quad_end: int
 
+    # Get a single Var object from vars dictionary
     def get_var(self, key: str) -> any:
         return self.vars.get(key, None)
     
@@ -167,7 +170,7 @@ def add_function(name, vars, exec_line):
     if function_exists(name):
         raise Exception(f"Multiple Redeclaration of {name} at {exec_line}")
 
-    funcs_table.append(Func(id=name, vars=vars, temp_vars=[], quad_start=0, quad_end=0))
+    funcs_table.append(Func(id=name, vars=vars, arguments=[], temp_vars=[], quad_start=0, quad_end=0))
 
 def set_func_quad_start(is_main_function: bool):
     global funcs_table, current_function, quads_table
@@ -197,7 +200,7 @@ def add_id(id):
 # Add the stored variables into a Variables Table for the current function
 # Kind -> Variable Kind (int | float)
 # exec_line -> Current line of execution, required for error checking
-def add_var(kind, exec_line):
+def add_var(kind: str, exec_line: str, is_function: bool):
     global funcs_table, current_function, id_queue
 
     while id_queue:
@@ -205,17 +208,21 @@ def add_var(kind, exec_line):
         
         if funcs_table[current_function].element_exists(name):
             raise Exception(f"Multiple Redeclaration of {name} at line {exec_line}")
+        
+        if is_function:
+            funcs_table[current_function].arguments.append(QuadArg(value=name, kind=kind))
 
         funcs_table[current_function].set_var(name, Var(name=name, kind=kind))
 
-# TODO: Find the name and data type in the vars table and use that if it is an ID, else, check the data type with a cast
-# in the meantime just store it
+# Add an operand to the operand stack
+# Function checks if operand is a constant or a target and considers factor_sign
+# Example: +constant, -constant, +1, -1
 def quad_add_operand(name, exec_line, is_var: bool = False):
     global operand
 
     temp_var: QuadArg
 
-    # Check the sign also with constants lmao 
+    # Check the sign also with constants
     if is_var:
         index_plus = name.find('+')
         index_minus = name.find('-')
@@ -309,15 +316,15 @@ def quad_check_assign():
         return
 
     if operator[-1] == '=':
-        left_operand = operand.pop()
         right_operand = operand.pop()
+        left_operand = operand.pop()
         op = operator.pop()
 
         result_kind = semantic_cube[op][left_operand.kind][right_operand.kind]
         if result_kind == 'null':
-            raise Exception(f"Type Mismatch between {right_operand.value} at {left_operand.value}")
+            raise Exception(f"Type Mismatch between {left_operand.value} at {right_operand.value}")
 
-        quads_table.append(Quadruple(op, left_operand, None, right_operand))
+        quads_table.append(Quadruple(op, right_operand, None, left_operand))
 
 def quad_check_if():
     global quads_table, operator, operand, quad_jumps
@@ -371,7 +378,16 @@ def get_function_call(id: str):
         if func.id == id:
             return func
 
-    return None  
+    return None
+
+def get_function_index(id: str):
+    global funcs_table, quads_table
+
+    for i in range(len(funcs_table)):
+        if funcs_table[i].id == id:
+            return i
+
+    return None
 
 def quad_init_function_call(id: str):
     global funcs_table, quads_table, operand
@@ -384,22 +400,24 @@ def quad_init_function_call(id: str):
     # TODO: To properly check the arguments of the functions, try to implement a funcArgs variable list independent of the main one, or add an extra parameter
     # to indicate the number of parameters
 
-    # if len(operand) != len(temp_func.vars):
-    #     raise Exception(f"Valieron los argumentos raza")
+    if len(operand) != len(temp_func.arguments):
+        raise Exception(f"Missing or extra arguments at function call {temp_func.id}")
 
     counter = len(operand)
+
+    print(temp_func.arguments)
 
     for i in temp_func.vars:
         if counter <= 0:
             break
         
-        tempOperand = operand.pop(0)
+        temp_operand = operand.pop(0)
         target = QuadArg(value=temp_func.vars[i].name, kind=temp_func.vars[i].kind)
-        quads_table.append(Quadruple(operation="=", arg1=tempOperand, arg2=QuadArg(value=temp_func.id, kind="function"), target=target))
+        quads_table.append(Quadruple(operation="=", arg1=temp_operand, arg2=QuadArg(value=temp_func.id, kind="function"), target=target))
         counter -= 1
 
-    quads_table.append(Quadruple(operation="GOTO", arg1=None, arg2=None, target=temp_func.quad_start))
-    quads_table[temp_func.quad_end-1].target = len(quads_table)
+    test = Quadruple(operation="GOTO", arg1=QuadArg(temp_func.id, kind="function"), arg2=None, target=temp_func.quad_start)
+    quads_table.append(test)
 
 # Notes for execution
 # If any goto function target goes out of bounds, it means that main function is empty or that the code already ended the execution
@@ -419,17 +437,23 @@ def run_quads():
     print()
 
     while instruction_pointer < len(quads_table):
+        # print(instruction_pointer, quads_table[instruction_pointer])
         execute_quad(quads_table[instruction_pointer])
         instruction_pointer += 1
-        # print(funcs_table[current_function_id].temp_vars)
         # input()
 
 def execute_quad(quad: Quadruple):
     global instruction_pointer, current_function_id, funcs_table, quads_table
 
     if quad.operation == "=":
-        value = format_expression_argument(quad.arg1)
-        funcs_table[current_function_id].get_var(quad.target.value).value = value
+        if quad.arg2 == None:
+            value = format_expression_argument(quad.arg1)
+            funcs_table[current_function_id].get_var(quad.target.value).value = value
+        else:
+            function_index = get_function_index(quad.arg2.value)
+            value = format_expression_argument(quad.arg1)
+            funcs_table[function_index].get_var(quad.target.value).value = value
+
 
     elif quad.operation == "+":
         # Get values for the arguments
@@ -542,6 +566,15 @@ def execute_quad(quad: Quadruple):
     elif quad.operation == "GOTO":
         # To properly assign the instruction_pointer, it is required to sub -1 the target to compensate the
         # update of the instruction_pointer at the next iteration
+        #print("GOTO", instruction_pointer, quad)
+
+        if quad.arg1 == None:
+            current_function_id = 0
+        else:
+            temp_func = get_function_call(quad.arg1.value)
+            current_function_id = get_function_index(quad.arg1.value)
+            quads_table[temp_func.quad_end-1].target = instruction_pointer + 1
+
         instruction_pointer = quad.target - 1
 
     elif quad.operation == "GOTOF":

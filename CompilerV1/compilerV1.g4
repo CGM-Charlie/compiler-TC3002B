@@ -15,7 +15,7 @@ program : {add_function("global", {}, 0)} {init_main_func_quad()} 'program' ID '
 
 // Vars
 vars_ : 'var' vars_helper | ;
-vars_helper : id_var ':' type_ ';' {add_var($type_.text, $type_.start.line)} vars_helper* ;
+vars_helper : id_var ':' type_ ';' {add_var($type_.text, $type_.start.line, False)} vars_helper* ;
 id_var : ID {add_id($ID.text)} (',' id_var)?;
 
 // Type
@@ -24,7 +24,7 @@ type_ : 'int' | 'float' ;
 // Funcs
 funcs : func (funcs)?;
 func : 'void' ID {add_function($ID.text, {}, $ID.line)} '(' param ')' '[' vars_ {set_func_quad_start(False)} body {set_func_quad_end()} ']' ';' ;
-param : ID {add_id($ID.text)} ':' type_ {add_var($type_.text, $type_.start.line)} (',' param)? | ;
+param : ID {add_id($ID.text)} ':' type_ {add_var($type_.text, $type_.start.line, True)} (',' param)? | ;
 
 // Body
 body : '{' statement* '}';
