@@ -357,7 +357,8 @@ def quad_check_if():
 # Initialize the else branch for the condition quadruple.
 def quad_check_else():
     global quads_table, operator, operand, quad_jumps
-    quads_table.append(Quadruple(operation="GOTO", arg1=quads_table[-1].target, arg2=None, target = None))
+
+    quads_table.append(Quadruple(operation="GOTO", arg1=None, arg2=None, target = None))
     false = quad_jumps.pop()
     quad_jumps.append(len(quads_table)-1)
     quads_table[false].target = len(quads_table)
@@ -446,8 +447,7 @@ def quad_init_function_call(id: str):
         quads_table.append(Quadruple(operation="=", arg1=temp_operand, arg2=QuadArg(value=temp_func.id, kind="function"), target=target))
         counter -= 1
 
-    test = Quadruple(operation="GOTO", arg1=QuadArg(temp_func.id, kind="function"), arg2=None, target=temp_func.quad_start)
-    quads_table.append(test)
+    quads_table.append(Quadruple(operation="GOTO", arg1=QuadArg(temp_func.id, kind="function"), arg2=None, target=temp_func.quad_start))
 
 # ----- Virtual Machine Segment -----
 
@@ -619,8 +619,11 @@ def execute_quad(quad: Quadruple):
             current_function_id = 0
         else:
             temp_func = get_function_call(quad.arg1.value)
+
+            if current_function_id == 0:
+                quads_table[temp_func.quad_end-1].target = instruction_pointer + 1
+
             current_function_id = get_function_index(quad.arg1.value)
-            quads_table[temp_func.quad_end-1].target = instruction_pointer + 1
 
         instruction_pointer = quad.target - 1
 
@@ -629,6 +632,13 @@ def execute_quad(quad: Quadruple):
         # To properly assign the instruction_pointer, it is required to sub -1 the target to compensate the
         # update of the instruction_pointer at the next iteration
         if not format_expression_argument(quad.arg1):
+
+            # Create the temporary variables memory space in case else branch is selected
+            for i in range(instruction_pointer + 1, quad.target-1):
+                if type(quads_table[i].target) == QuadArg:
+                    if quads_table[i].target.value[0] == "_":
+                        funcs_table[current_function_id].temp_vars.append(0)
+
             instruction_pointer = quad.target - 1
 
     # GOTO True jump. Updates the instruction pointer address to jump if the expressio result is true
@@ -644,7 +654,7 @@ def format_expression_argument(quad_arg: QuadArg) -> any:
     
     value = None
 
-    # Check if quad_arg is a variable
+    # Check if quad_arg is a temp variable
     if quad_arg.value[0] == "_":
         value = funcs_table[current_function_id].temp_vars[int(quad_arg.value[2:])]
 
@@ -655,7 +665,7 @@ def format_expression_argument(quad_arg: QuadArg) -> any:
         else:
             value = float(quad_arg.value)
     
-    # Default to a constant
+    # Default to a variable
     else:
         if quad_arg.value[0] == "+":
             value = funcs_table[current_function_id].get_var(quad_arg.value[1:]).value

@@ -1,42 +1,34 @@
 program CompilerV1;
 var 
-    foo, bar, number1, num, n1, n2, n3, cont: int; 
-    foobar, barfoo: float;
+    foo: int; 
 
-void emptyFunction1() [
-    var
-        number1: int;
-    {
-        number1 = 420;
-        print(number1);
-    }
-];
-void emptyFunction2(floatNumber: float, intNumber: int) [
+void emptyFunction2(numero: int) [
     var 
         number1: int;
         number2: float;
     {
-        print(floatNumber);
-        print(number2);
+        print(numero);
+
+        if(numero < 2) {
+            emptyFunction2(numero+1);
+        } else {
+            print("nachas");
+        };
     }
 ];
 
 main 
 { 
     foo = 0;
-    bar = 0;
 
-    while {
-        print(foo);
+    if (1 < 0) {
+        foo = 1 - 1;
+    } else {
+        foo = 2 - 2;
+    };
 
-        while { 
-            print("BAR")
-            bar = bar + 1;
-        } do (bar < 4);
-
-        bar = 0;
-        foo = foo + 1;
-    } do (foo < 10);
+    emptyFunction2(foo);
+    print("SALI DE LA RECURSION ALV");
 }
 
 end

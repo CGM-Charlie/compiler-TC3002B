@@ -11,7 +11,7 @@ from variableTable import *
 }
 
 // Program
-program : {add_function("global", {}, 0)} {init_main_func_quad()} 'program' ID ';' vars_ funcs 'main' {set_func_quad_start(True)} body {print_funcs_table()} 'end' {run_quads()} ;
+program : {add_function("global", {}, 0)} {init_main_func_quad()} 'program' ID ';' vars_ funcs? 'main' {set_func_quad_start(True)} body {print_funcs_table()} 'end' {run_quads()} ;
 
 // Vars
 vars_ : 'var' vars_helper | ;
