@@ -7,7 +7,7 @@
 grammar compilerV1;
 
 @parser::header { 
-from variableTable import *
+from compiler_middleware import *
 }
 
 // Program

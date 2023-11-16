@@ -9,7 +9,7 @@ else:
 	from typing.io import TextIO
 
  
-from variableTable import *
+from compiler_middleware import *
 
 
 def serializedATN():

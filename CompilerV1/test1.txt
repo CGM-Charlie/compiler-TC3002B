@@ -1,0 +1,68 @@
+program test1;
+var
+    n1, n2: int;
+    n3: float;
+
+void recursiveCycle(i: int, iterations: int) [
+    var 
+        number1: int;
+        number2: float;
+    {
+        print(i);
+
+        if (i < iterations) { 
+            recursiveCycle(i+1, iterations);
+        } else {
+            print("Fin de ciclo");
+        };
+    }
+];
+
+void fibonacci(num: int) [
+    var
+        n1, n2, n3: int;
+        cont: int;
+    {
+        cont = 0;
+        n1 = 0;
+        n2 = 1;
+        if (num < 1) {
+            print("Not a valid number");
+        } else {
+            if (num < 2) {
+                print(n1);
+            } else {
+                while {
+                    print(n1);
+                    n3 = n1 + n2;
+                    n1 = n2;
+                    n2 = n3;
+                    cont = cont + 1;
+                } do (cont < num);
+            };
+        };
+    }
+];
+
+main 
+{ 
+    print("Operaciones basicas");
+    n1 = 1 + 2 * 3 * (4 + 5);
+    print(n1);
+
+    print("division entera");
+    n2 = 5/2;
+    print(n2);
+
+    print("division decimal");
+    n3 = 5.0/2.0;
+    print(n3);
+
+    print("Ciclo recursivo");
+    recursiveCycle(1, 10);
+
+    print("Fibonacci");
+    fibonacci(20);
+}
+
+end

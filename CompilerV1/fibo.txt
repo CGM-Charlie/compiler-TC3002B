@@ -1,0 +1,30 @@
+program Fibonacci;
+var
+    n1, n2, n3, num: int;
+    cont: int;
+void simplefunc(floaty: float, inty:int)[{}];    
+main
+{
+    num = 100;
+    cont = 0;
+    n1 = 0;
+    n2 = 1;
+    if (num < 1) {
+        print("Not a valid number");
+    } else {
+        if (num < 2) {
+        print("Fibonacci seq");
+        print(n1);
+        } else {
+        print("Fibonacci seq");
+        while {
+            print(n1);
+            n3 = n1 + n2;
+            n1 = n2;
+            n2 = n3;
+            cont = cont + 1;
+        } do (cont < num);
+        };
+    };
+}
+end
