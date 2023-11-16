@@ -35,13 +35,16 @@ class Func:
     def get_var(self, key: str) -> any:
         return self.vars.get(key, None)
     
+    # Get a single Var object from vars dictionary as a QuadArg object
     def get_var_as_quad_arg(self, key: str) -> QuadArg:
         temp_var = self.vars.get(key, None)
         return QuadArg(value=temp_var.name, kind=temp_var.kind)
 
+    # Set a new var into the vars dictionary
     def set_var(self, key: str, value: any) -> None:
         self.vars[key] = value
 
+    # Check if a Var exists in the vars dictionary
     def element_exists(self, key: str) -> bool:
         return key in self.vars
 
@@ -163,6 +166,9 @@ def function_exists(name) -> bool:
     return False
 
 # Add a new function to the functions table
+# name -> Name of the function
+# vars -> Dictionary of variables
+# exec_line -> Current line of the input file. Just for debbuggin purposes
 def add_function(name, vars, exec_line):
     global funcs_table, current_function, temporary_var_index
     current_function += 1
@@ -172,6 +178,7 @@ def add_function(name, vars, exec_line):
 
     funcs_table.append(Func(id=name, vars=vars, arguments=[], temp_vars=[], quad_start=0, quad_end=0))
 
+# Set the starting point of a function
 def set_func_quad_start(is_main_function: bool):
     global funcs_table, current_function, quads_table
 
@@ -182,12 +189,14 @@ def set_func_quad_start(is_main_function: bool):
     else:
         funcs_table[current_function].quad_start = len(quads_table)
 
+# Set the ending point of a function
 def set_func_quad_end():
     global funcs_table, current_function, quads_table, temporary_var_index
     quads_table.append(Quadruple(operation="GOTO", arg1=None, arg2=None, target=None))
     funcs_table[current_function].quad_end = len(quads_table)
     temporary_var_index = 0
 
+# Initialize the starting GOTO Quadruple to jump to the start function
 def init_main_func_quad():
     global quads_table
     quads_table.append(Quadruple(operation="GOTO", arg1=None, arg2=None, target=None))
@@ -246,14 +255,18 @@ def quad_add_operand(name, exec_line, is_var: bool = False):
 
     operand.append(temp_var)
 
+# Add a new operator to the operator stack
+# Name -> Operator sign, Ex. +, -, =, !=
 def quad_add_operator(name):
     global operator
     operator.append(name)
 
+# Pop the last operator of the operator stack
 def quad_pop_operator():
     global operator
     operator.pop()
 
+# Check if there is a pending multiplication or division to solve in the operator stack
 def quad_check_mult_or_div():
     global quads_table, operator, operand, temporary_var_index
 
@@ -274,6 +287,7 @@ def quad_check_mult_or_div():
         operand.append(result)
         temporary_var_index += 1
 
+# Check if there is a pending addition or substraction to solve in the opeartor stack
 def quad_check_sum_or_sub():
     global quads_table, operator, operand, temporary_var_index
 
@@ -294,6 +308,7 @@ def quad_check_sum_or_sub():
         operand.append(result)
         temporary_var_index += 1
 
+# Check if there is a pending boolean evaluation to solve in the operator stack
 def quad_check_boolean():
     global quads_table, operator, operand, temporary_var_index
 
@@ -309,6 +324,7 @@ def quad_check_boolean():
         operand.append(result)
         temporary_var_index += 1
 
+# Check if there is a pending assign evaluation to make in the operator stack
 def quad_check_assign():
     global quads_table, operator, operand, temporary_var_index
 
@@ -326,6 +342,8 @@ def quad_check_assign():
 
         quads_table.append(Quadruple(op, right_operand, None, left_operand))
 
+# Initialize a condition quadruple. This evaluates the last element in the operand stack.
+# In this functions only initializes the if section of the conditional
 def quad_check_if():
     global quads_table, operator, operand, quad_jumps
 
@@ -336,6 +354,7 @@ def quad_check_if():
     quads_table.append(Quadruple(operation="GOTOF", arg1=quads_table[-1].target, arg2=None, target = None))
     quad_jumps.append(len(quads_table)-1)
 
+# Initialize the else branch for the condition quadruple.
 def quad_check_else():
     global quads_table, operator, operand, quad_jumps
     quads_table.append(Quadruple(operation="GOTO", arg1=quads_table[-1].target, arg2=None, target = None))
@@ -343,15 +362,20 @@ def quad_check_else():
     quad_jumps.append(len(quads_table)-1)
     quads_table[false].target = len(quads_table)
 
+# Ends the condition quadruples declaration.
+# Generates at the end of the branch a GOTO to jump to the next line of the condition branch
 def quad_end_if():
     global quads_table, operator, operand, quad_jumps
     end = quad_jumps.pop()
     quads_table[end].target = len(quads_table)
 
+# Initialize the cycle quadruples declaration.
 def quad_check_while():
     global quads_table, operator, operand, quad_jumps
     quad_jumps.append(len(quads_table))
 
+# Create the branching of the while cycle
+# In the function creates the GOTOT quadruple to check the evaluation of the while cycle
 def quad_evaluate_while():
     global quads_table, operator, operand, quad_jumps
 
@@ -362,15 +386,18 @@ def quad_evaluate_while():
     end = quad_jumps.pop()
     quads_table.append(Quadruple(operation="GOTOT", arg1=quads_table[-1].target, arg2=None, target = end))
 
+# Create the print quadruple for an expression
 def quad_print_expression():
     global quads_table, operand
     result = operand.pop()
     quads_table.append(Quadruple(operation="PRINT", arg1=result, arg2=None, target=None))
 
+# Create the print quadruple for a string constant
 def quad_print_string(text: str):
     global quads_table
     quads_table.append(Quadruple(operation="PRINT", arg1=QuadArg(value=text, kind='str'), arg2=None, target=None))
 
+# Helper method to get a single function from the funcs_list
 def get_function_call(id: str):
     global funcs_table, quads_table
 
@@ -380,6 +407,7 @@ def get_function_call(id: str):
 
     return None
 
+# Helper method to get the index from a single function from the funcs_list
 def get_function_index(id: str):
     global funcs_table, quads_table
 
@@ -389,23 +417,25 @@ def get_function_index(id: str):
 
     return None
 
+# Creates the quadruples for a function call.
+# Checks that the function that is call exists
+# Checks the arguments of the function
+# If the function has arguments, creates the assign quadruples to initialize the variables in the right variable table
+# Creates the GOTO table to jump to the function quadruples in the quadruples list
 def quad_init_function_call(id: str):
     global funcs_table, quads_table, operand
 
     temp_func = get_function_call(id=id)
 
+    # Check if function exists
     if temp_func == None:
         raise Exception(f"Unknown '{id}' function call")
-    
-    # TODO: To properly check the arguments of the functions, try to implement a funcArgs variable list independent of the main one, or add an extra parameter
-    # to indicate the number of parameters
 
+    # Check missing or extra arguments of the function
     if len(operand) != len(temp_func.arguments):
         raise Exception(f"Missing or extra arguments at function call {temp_func.id}")
 
     counter = len(operand)
-
-    print(temp_func.arguments)
 
     for i in temp_func.vars:
         if counter <= 0:
@@ -419,18 +449,21 @@ def quad_init_function_call(id: str):
     test = Quadruple(operation="GOTO", arg1=QuadArg(temp_func.id, kind="function"), arg2=None, target=temp_func.quad_start)
     quads_table.append(test)
 
+# ----- Virtual Machine Segment -----
+
 # Notes for execution
 # If any goto function target goes out of bounds, it means that main function is empty or that the code already ended the execution
 
-# Virtual Machine Segment - CarLang
-
-# Function id refers to the current function that is currently being executed
+# Current function that is being excecuted from the funcs_list. 0 means main function is being excecuted
 current_function_id = 0
+# Instruction pointer. Indicates the current quadruple that is being excecuted
 instruction_pointer = 0
 
+# Initialize the Virtual Machine for the quadruples
 def run_quads():
     global quads_table, instruction_pointer, funcs_table
 
+    # Debbuging function to print the complete quadruples list
     print("Quads")
     for i in range(0, len(quads_table)):
         print(i, quads_table[i])
@@ -442,9 +475,13 @@ def run_quads():
         instruction_pointer += 1
         # input()
 
+# Excecute the quadruple code
 def execute_quad(quad: Quadruple):
     global instruction_pointer, current_function_id, funcs_table, quads_table
 
+    # Assign operation
+    # If the argument 2 is None, assigns the argument of a function
+    # Else, regular assign of a variable in the current function context
     if quad.operation == "=":
         if quad.arg2 == None:
             value = format_expression_argument(quad.arg1)
@@ -454,7 +491,7 @@ def execute_quad(quad: Quadruple):
             value = format_expression_argument(quad.arg1)
             funcs_table[function_index].get_var(quad.target.value).value = value
 
-
+    # Addition operation
     elif quad.operation == "+":
         # Get values for the arguments
         left_operand = format_expression_argument(quad.arg1)
@@ -472,7 +509,7 @@ def execute_quad(quad: Quadruple):
             else:
                 funcs_table[current_function_id].temp_vars.append(float(left_operand + right_operand))
 
-
+    # Subtraction operation
     elif quad.operation == "-":
         # Get values for the arguments
         left_operand = format_expression_argument(quad.arg1)
@@ -490,6 +527,7 @@ def execute_quad(quad: Quadruple):
             else:
                 funcs_table[current_function_id].temp_vars.append(float(left_operand - right_operand))
 
+    # Multiplication operation
     elif quad.operation == "*":
         # Get values for the arguments
         left_operand = format_expression_argument(quad.arg1)
@@ -507,6 +545,9 @@ def execute_quad(quad: Quadruple):
             else:
                 funcs_table[current_function_id].temp_vars.append(float(left_operand * right_operand))
 
+    # Division operation
+    # Supports integer division by making division with only integers
+    # Supports decimal division by making division with only float numbers
     elif quad.operation == "/":
         # Get values for the arguments
         left_operand = format_expression_argument(quad.arg1)
@@ -524,6 +565,7 @@ def execute_quad(quad: Quadruple):
             else:
                 funcs_table[current_function_id].temp_vars.append(float(left_operand / right_operand))
 
+    # < boolean evaluation
     elif quad.operation == "<":
         # Get values for the arguments
         left_operand = format_expression_argument(quad.arg1)
@@ -535,6 +577,7 @@ def execute_quad(quad: Quadruple):
         else:
             funcs_table[current_function_id].temp_vars.append(left_operand < right_operand)
 
+    # > boolean evaluation
     elif quad.operation == ">":
         # Get values for the arguments
         left_operand = format_expression_argument(quad.arg1)
@@ -546,6 +589,7 @@ def execute_quad(quad: Quadruple):
         else:
             funcs_table[current_function_id].temp_vars.append(left_operand > right_operand)
 
+    # != boolean evaluation
     elif quad.operation == "!=":
         # Get values for the arguments
         left_operand = format_expression_argument(quad.arg1)
@@ -557,16 +601,19 @@ def execute_quad(quad: Quadruple):
         else:
             funcs_table[current_function_id].temp_vars.append(left_operand != right_operand)
 
+    # Print evaluation
     elif quad.operation == "PRINT":
         if quad.arg1.kind == 'str':
             print(quad.arg1.value.replace('"', ''))
         else:
             print(format_expression_argument(quad.arg1))
 
+    # GOTO Jump. Updates the instruction pointer address to jump to another region of quadruples to excecute
+    # If the arg1 of the quadruple is None, the jump is addressed to the main function
+    # Else, the jump is addressed to a function
     elif quad.operation == "GOTO":
         # To properly assign the instruction_pointer, it is required to sub -1 the target to compensate the
         # update of the instruction_pointer at the next iteration
-        #print("GOTO", instruction_pointer, quad)
 
         if quad.arg1 == None:
             current_function_id = 0
@@ -577,18 +624,21 @@ def execute_quad(quad: Quadruple):
 
         instruction_pointer = quad.target - 1
 
+    # GOTO False jump. Updates the instruction pointer address to jump if the expressio result is false
     elif quad.operation == "GOTOF":
         # To properly assign the instruction_pointer, it is required to sub -1 the target to compensate the
         # update of the instruction_pointer at the next iteration
         if not format_expression_argument(quad.arg1):
             instruction_pointer = quad.target - 1
 
+    # GOTO True jump. Updates the instruction pointer address to jump if the expressio result is true
     elif quad.operation == "GOTOT":
         # To properly assign the instruction_pointer, it is required to sub -1 the target to compensate the
         # update of the instruction_pointer at the next iteration
         if format_expression_argument(quad.arg1):
             instruction_pointer = quad.target - 1
 
+# Format the quadruple argument to fetch the values of variables, constants or temporals from memory
 def format_expression_argument(quad_arg: QuadArg) -> any:
     global current_function_id, funcs_table
     
